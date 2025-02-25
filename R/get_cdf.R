@@ -1,6 +1,7 @@
 #' Compute Conditional Distribution Functions (CDF) from Response Time Data
 #'
-#' This function computes CDF values from response time data, optionally grouping by conditions.
+#' This function computes CDF values from response time data, optionally
+#' grouping by conditions.
 #' @param data A data frame / tibble in long format with columns containing
 #' (at the very least) response time and accuracy.
 #'
@@ -16,10 +17,10 @@
 #' If there are multiple conditions, provide a concatenated vector of condition
 #' column names (e.g., c("age_group", "gender")).
 #'
-#' Note that for plotting, only three conditions can be plotted. The order of conditions matters when there
-#' are more than two conditions:
-#' * If there are just two conditions,the first condition will be grouped on the plot and the second condition will
-#' be faceted as columns.
+#' Note that for plotting, only three conditions can be plotted. The order of
+#' conditions matters when there are more than two conditions:
+#' * If there are just two conditions,the first condition will be grouped on the
+#' plot and the second condition will be faceted as columns.
 #' * If there are three conditions, the first condition
 #' will be grouped, the second will be faceted as columns, and the third will
 #' be faceted as rows.
