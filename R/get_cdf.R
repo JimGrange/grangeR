@@ -29,12 +29,19 @@
 #'
 #' @param probs A vector of probability values for the CDF.
 #'
-#' @importFrom dplyr group_by
 #' @importFrom dplyr across
+#' @importFrom dplyr filter
+#' @importFrom dplyr group_by
+#' @importFrom dplyr mutate
+#' @importFrom dplyr rename
+#' @importFrom dplyr rename_with
 #' @importFrom dplyr select
 #' @importFrom dplyr summarise
-#' @importFrom dplyr rename_with
-#' @importFrom dplyr mutate
+#' @importFrom ggplot2 ggplot aes coord_flip element_text geom_errorbar
+#' geom_point geom_line theme theme_bw labs scale_colour_discrete
+#' scale_x_continuous facet_grid
+#' @importFrom rlang .data
+#' @importFrom stats sd quantile
 #' @importFrom tidyr unnest_wider
 #' @importFrom tidyr pivot_longer
 #' @importFrom tidyselect all_of
@@ -58,7 +65,12 @@ get_cdf <- function(data,
       mutate(id = 1)
   }
 
-
+  # if id is not null, add column called id
+  if(!is.null(id_var)){
+    if(id_var != "id"){
+      data$id <- data[[id_var]]
+    }
+  }
 
   # remove errors if requested
   if(include_errors == FALSE){
@@ -68,14 +80,14 @@ get_cdf <- function(data,
 
  # get the CDF values for each individual
  id_data <- data |>
-   group_by(id,
+   group_by(.data$id,
             across(all_of(conditions))) |>
    summarise(quantiles = list(quantile(.data[[rt_var]],
                                        probs = probs)),
              .groups = "drop") |>
-   unnest_wider(quantiles) |>
+   unnest_wider(.data$quantiles) |>
    rename_with(~ str_remove(.x, "%")) |>
-   pivot_longer(cols = c(-conditions, -id),
+   pivot_longer(cols = c(-conditions, -.data$id),
                 names_to = "quantile",
                 values_to = rt_var) |>
    mutate(quantile = as.numeric(quantile) / 100)
@@ -83,18 +95,21 @@ get_cdf <- function(data,
  # get the CDF data averaged across subjects
  if(is.null(id_var)){
    id_averaged_data <- id_data |>
-     rename(mean_rt = rt) |>
+     rename(mean_rt = .data$rt) |>
      mutate(se_rt = 0)
  } else {
    id_averaged_data <- id_data |>
      group_by(across(all_of(conditions)),
-              quantile) |>
-     summarise(mean_rt = mean(rt),
-               se_rt = sd(rt) / sqrt(length(rt)),
+              .data$quantile) |>
+     summarise(mean_rt = mean(.data$rt),
+               se_rt = sd(.data$rt) / sqrt(length(.data$rt)),
                .groups = "drop")
  }
 
-
+ if(id_var != "id"){
+   data <- data |>
+     select(-.data$id)
+ }
 
 
  #--- do the plotting
@@ -102,12 +117,12 @@ get_cdf <- function(data,
  # plot if there are no conditions
  if(is.null(conditions)){
    plot <- id_averaged_data |>
-     ggplot(aes(x = quantile,
-                y = mean_rt)) +
+     ggplot(aes(x = .data$quantile,
+                y = .data$mean_rt)) +
      geom_point(size = 3) +
      geom_line(linewidth = 1) +
-     geom_errorbar(aes(ymin = mean_rt - se_rt,
-                       ymax = mean_rt + se_rt),
+     geom_errorbar(aes(ymin = .data$mean_rt - .data$se_rt,
+                       ymax = .data$mean_rt + .data$se_rt),
                    width = 0.02) +
      theme_bw() +
      labs(y = "Mean Response Time (ms)",
@@ -123,16 +138,16 @@ get_cdf <- function(data,
  if(length(conditions) == 1){
    id_averaged_data$condition <- as.factor(id_averaged_data[[conditions]])
    plot <- id_averaged_data |>
-     ggplot(aes(x = quantile,
-                y = mean_rt,
-                group = condition)) +
-     geom_point(aes(colour = condition),
+     ggplot(aes(x = .data$quantile,
+                y = .data$mean_rt,
+                group = .data$condition)) +
+     geom_point(aes(colour = .data$condition),
                 size = 3) +
-     geom_line(aes(colour = condition),
+     geom_line(aes(colour = .data$condition),
                linewidth = 1) +
-     geom_errorbar(aes(ymin = mean_rt - se_rt,
-                       ymax = mean_rt + se_rt,
-                       colour = condition),
+     geom_errorbar(aes(ymin = .data$mean_rt - .data$se_rt,
+                       ymax = .data$mean_rt + .data$se_rt,
+                       colour = .data$condition),
                    width = 0.02) +
      theme_bw() +
      labs(y = "Mean Response Time (ms)",
@@ -145,7 +160,7 @@ get_cdf <- function(data,
      theme(legend.position = "bottom")
 
    # remove the conditions tag
-   id_averaged_data <- id_averaged_data |> select(-condition)
+   id_averaged_data <- id_averaged_data |> select(-.data$condition)
  }
 
  # plot if there are two conditions
@@ -153,18 +168,18 @@ get_cdf <- function(data,
    id_averaged_data$condition_1 <- as.factor(id_averaged_data[[conditions[1]]])
    id_averaged_data$condition_2 <- as.factor(id_averaged_data[[conditions[2]]])
    plot <- id_averaged_data |>
-     ggplot(aes(x = quantile,
-                y = mean_rt,
-                group = condition_1)) +
-     geom_point(aes(colour = condition_1),
+     ggplot(aes(x = .data$quantile,
+                y = .data$mean_rt,
+                group = .data$condition_1)) +
+     geom_point(aes(colour = .data$condition_1),
                 size = 3) +
-     geom_line(aes(colour = condition_1),
+     geom_line(aes(colour = .data$condition_1),
                linewidth = 1) +
-     geom_errorbar(aes(ymin = mean_rt - se_rt,
-                       ymax = mean_rt + se_rt,
-                       colour = condition_1),
+     geom_errorbar(aes(ymin = .data$mean_rt - .data$se_rt,
+                       ymax = .data$mean_rt + .data$se_rt,
+                       colour = .data$condition_1),
                    width = 0.02) +
-     facet_grid(.~condition_2) +
+     facet_grid(.~.data$condition_2) +
      theme_bw() +
      labs(y = "Mean Response Time (ms)",
           x = "Probability") +
@@ -176,8 +191,8 @@ get_cdf <- function(data,
      theme(legend.position = "bottom")
 
    # remove the conditions tag
-   id_averaged_data <- id_averaged_data |> select(-condition_1,
-                                                  -condition_2)
+   id_averaged_data <- id_averaged_data |> select(-.data$condition_1,
+                                                  -.data$condition_2)
  }
 
  # plot if there are three conditions
@@ -188,18 +203,18 @@ get_cdf <- function(data,
    id_averaged_data$condition_3 <- as.factor(id_averaged_data[[conditions[3]]])
 
    plot <- id_averaged_data |>
-     ggplot(aes(x = quantile,
-                y = mean_rt,
-                group = condition_1)) +
-     geom_point(aes(colour = condition_1),
+     ggplot(aes(x = .data$quantile,
+                y = .data$mean_rt,
+                group = .data$condition_1)) +
+     geom_point(aes(colour = .data$condition_1),
                 size = 3) +
-     geom_line(aes(colour = condition_1),
+     geom_line(aes(colour = .data$condition_1),
                linewidth = 1) +
-     geom_errorbar(aes(ymin = mean_rt - se_rt,
-                       ymax = mean_rt + se_rt,
-                       colour = condition_1),
+     geom_errorbar(aes(ymin = .data$mean_rt - .data$se_rt,
+                       ymax = .data$mean_rt + .data$se_rt,
+                       colour = .data$condition_1),
                    width = 0.02) +
-     facet_grid(condition_3 ~ condition_2) +
+     facet_grid(.data$condition_3 ~ .data$condition_2) +
      theme_bw() +
      labs(y = "Mean Response Time (ms)",
           x = "Probability") +
@@ -211,9 +226,9 @@ get_cdf <- function(data,
      theme(legend.position = "bottom")
 
    # remove the conditions tag
-   id_averaged_data <- id_averaged_data |> select(-condition_1,
-                                                  -condition_2,
-                                                  -condition_3)
+   id_averaged_data <- id_averaged_data |> select(-.data$condition_1,
+                                                  -.data$condition_2,
+                                                  -.data$condition_3)
  }
 
  # if conditions greater than three, plot will not be returned
