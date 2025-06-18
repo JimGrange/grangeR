@@ -1,0 +1,27 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# grangeR
+
+The goal of `grangeR` is to provide—in a single place—several utilility
+functions often used in the research of the [Grange
+Lab](https://jimgrange.github.io/).
+
+## Installation
+
+You can install the development version of `grangeR` from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("JimGrange/grangeR")
+```
+
+## Implemented Functions
+
+### Plotting
+
+- `get_cdf()`: Produces cumulative density functions for response time
+  experimental data. Defective CDFs can also be produced.
+- `get_caf()`: Produces conditional accuracy function plots for response
+  time and accuracy experimental data.
