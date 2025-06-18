@@ -35,8 +35,7 @@ data <- grangeR::task_switching
 cdf_plot <- get_cdf(data = data, 
                     id_var = "id", 
                     conditions = c("response_set_sequence", 
-                                   "stimulus_set_sequence",
-                                   "compatibility"), 
+                                   "stimulus_set_sequence"), 
                     defective = TRUE)
 ```
 
