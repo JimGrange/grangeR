@@ -77,7 +77,13 @@ get_cdf <- function(data,
     }
   }
 
-  # remove errors if requested
+  #--- remove errors if requested, but first calculate accuracy in case
+  # defective CDFs are required
+  accuracy <- data |>
+    group_by(.data$id,
+             across(all_of(conditions))) |>
+    summarise(prop = mean(.data[[accuracy_var]]), .groups = "drop")
+
   if(include_errors == FALSE){
     data <- data |>
       filter(data[[accuracy_var]] == 1)
@@ -113,19 +119,7 @@ get_cdf <- function(data,
 
  #--- if the user has requested defective CDFs..
 
- # send error if error trials have been removed
- if(defective == TRUE){
-   if(include_errors == FALSE){
-     stop("Defective CDFs require include_errors = TRUE", call. = FALSE)
-   }
-
-   # get proportion accuracy per id per condition
-   accuracy <- data |>
-     group_by(.data$id,
-              across(all_of(conditions))) |>
-     summarise(prop = mean(.data[[accuracy_var]]), .groups = "drop")
-
-   # based on this, scale the quantile by proportion accuracy
+   # scale the quantile by proportion accuracy
    id_data <- id_data |>
      inner_join(accuracy, by = c("id", all_of(conditions))) |>
      mutate(scaled_quantile = quantile * prop) |>
@@ -147,12 +141,6 @@ get_cdf <- function(data,
        select(!quantile) |>
        rename(quantile = scaled_quantile)
    }
-
- }
-
-
-
-
 
 
  # tidy up

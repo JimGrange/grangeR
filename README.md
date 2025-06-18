@@ -37,7 +37,6 @@ cdf_plot <- get_cdf(data = data,
                     conditions = c("response_set_sequence", 
                                    "stimulus_set_sequence",
                                    "compatibility"), 
-                    include_errors = TRUE,
                     defective = TRUE)
 ```
 
