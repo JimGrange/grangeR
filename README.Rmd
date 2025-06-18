@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # grangeR
 
 The goal of `grangeR` is to provide---in a single place---several utilility functions often used 
-in the research of the [Grange Lab](https://jimgrange.github.io/).
+in the research of the [Grange Lab](https://jimgrange.github.io/). These range from general helper functions to full plotting functions.
 
 ## Installation
 
@@ -30,6 +30,6 @@ devtools::install_github("JimGrange/grangeR")
 ## Implemented Functions
 
 ### Plotting
-* `get_cdf()`: Produces cumulative density functions for response time experimental data. Defective CDFs can also be produced.
-* `get_caf()`: Produces conditional accuracy function plots for response time and accuracy experimental data. 
+* `get_cdf()`: Produces cumulative density function (CDF) plots for response time experimental data. Defective CDFs (i.e., quantiles scaled by accuracy) can also be produced.
+* `get_caf()`: Produces conditional accuracy function (CAF) plots for response time and accuracy experimental data. 
 
