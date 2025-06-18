@@ -1,6 +1,6 @@
 Package: grangeR
-Title: Utility functions for the Grange Lab
-Version: 0.0.0.9000
+Title: Utility functions for the Grange Lab.
+Version: 0.0.0.9001
 Authors@R: 
     person("Jim", "Grange", , "grange.jim@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-8352-8390"))

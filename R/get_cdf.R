@@ -30,6 +30,9 @@
 #'
 #' @param probs A vector of probability values for the CDF.
 #'
+#' @param defective A logical variable (TRUE/FALSE) indicating whether the CDFs
+#' should be defective; that is, scaled by the accuracy
+#'
 #' @importFrom dplyr across
 #' @importFrom dplyr filter
 #' @importFrom dplyr group_by
@@ -56,7 +59,8 @@ get_cdf <- function(data,
                     id_var = NULL,
                     conditions = NULL,
                     include_errors = FALSE,
-                    probs = c(.1, .3, .5, .7, .9)){
+                    probs = c(.1, .3, .5, .7, .9),
+                    defective = FALSE){
 
 
   # if id is null (i.e., perhaps it's data from just a single participant or
@@ -107,6 +111,51 @@ get_cdf <- function(data,
                .groups = "drop")
  }
 
+ #--- if the user has requested defective CDFs..
+
+ # send error if error trials have been removed
+ if(defective == TRUE){
+   if(include_errors == FALSE){
+     stop("Defective CDFs require include_errors = TRUE", call. = FALSE)
+   }
+
+   # get proportion accuracy per id per condition
+   accuracy <- data |>
+     group_by(.data$id,
+              across(all_of(conditions))) |>
+     summarise(prop = mean(.data[[accuracy_var]]), .groups = "drop")
+
+   # based on this, scale the quantile by proportion accuracy
+   id_data <- id_data |>
+     inner_join(accuracy, by = c("id", all_of(conditions))) |>
+     mutate(scaled_quantile = quantile * prop) |>
+     select(!prop)
+
+   # get the CDF data averaged across subjects
+   if(is.null(id_var)){
+     id_averaged_data <- id_data |>
+       rename(mean_rt = .data$rt) |>
+       mutate(se_rt = 0)
+   } else {
+     id_averaged_data <- id_data |>
+       group_by(across(all_of(conditions)),
+                .data$quantile) |>
+       summarise(scaled_quantile = mean(scaled_quantile),
+                 mean_rt = mean(.data$rt),
+                 se_rt = sd(.data$rt) / sqrt(length(.data$rt)),
+                 .groups = "drop") |>
+       select(!quantile) |>
+       rename(quantile = scaled_quantile)
+   }
+
+ }
+
+
+
+
+
+
+ # tidy up
  if(id_var != "id"){
    data <- data |>
      select(-.data$id)
@@ -238,11 +287,25 @@ get_cdf <- function(data,
             be returned.")
  }
 
- return_data <- list(
-   id_data = id_data,
-   id_averaged_data = id_averaged_data,
-   plot = plot
- )
+ if(defective == TRUE){
+   return_data <-
+     list(
+       id_data = id_data,
+       id_averaged_data = id_averaged_data,
+       accuracy_data = accuracy,
+       plot = plot
+     )
+ } else {
+   return_data <-
+     list(
+       id_data = id_data,
+       id_averaged_data = id_averaged_data,
+       plot = plot
+     )
+ }
+
+
+
  plot(plot)
  return(return_data)
 
