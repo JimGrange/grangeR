@@ -27,3 +27,24 @@ devtools::install_github("JimGrange/grangeR")
   scaled by accuracy) can also be produced.
 - `get_caf()`: Produces conditional accuracy function (CAF) plots for
   response time and accuracy experimental data.
+
+``` r
+library(grangeR)
+data <- grangeR::task_switching
+
+cdf_plot <- get_cdf(data = data, 
+                    id_var = "id", 
+                    conditions = c("response_set_sequence", 
+                                   "stimulus_set_sequence",
+                                   "compatibility"), 
+                    include_errors = TRUE,
+                    defective = TRUE)
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+``` r
+cdf_plot$plot
+```
+
+<img src="man/figures/README-unnamed-chunk-2-2.png" width="100%" />
