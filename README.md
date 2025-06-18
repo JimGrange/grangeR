@@ -29,9 +29,13 @@ devtools::install_github("JimGrange/grangeR")
   response time and accuracy experimental data.
 
 ``` r
+# load the package
 library(grangeR)
+
+# load the task switching data
 data <- grangeR::task_switching
 
+# get a defective CDF plot
 cdf_plot <- get_cdf(data = data, 
                     id_var = "id", 
                     conditions = c("response_set_sequence", 
@@ -40,9 +44,3 @@ cdf_plot <- get_cdf(data = data,
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
-
-``` r
-cdf_plot$plot
-```
-
-<img src="man/figures/README-unnamed-chunk-2-2.png" width="100%" />
