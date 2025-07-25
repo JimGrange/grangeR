@@ -30,7 +30,7 @@ devtools::install_github("JimGrange/grangeR")
 ## Implemented Functions
 
 ### Plotting
-* `get_cdf()`: Produces cumulative density function (CDF) plots for response time experimental data. Defective CDFs (i.e., quantiles scaled by accuracy) can also be produced.
+* `get_cdf()`: Produces cumulative density function (CDF) plots for response time experimental data. Defective CDFs (i.e., quantiles scaled by accuracy) can also be produced.dev
 * `get_caf()`: Produces conditional accuracy function (CAF) plots for response time and accuracy experimental data. 
 
 ```{r}
@@ -44,7 +44,7 @@ data <- grangeR::task_switching
 cdf_plot <- get_cdf(data = data, 
                     id_var = "id", 
                     conditions = c("response_set_sequence", 
-                                   "stimulus_set_sequence"), 
+                                   "stimulus_set_sequence"),
                     defective = TRUE)
 ```
 
